@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterviewAI — Ace Every Interview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1420;
+    --surface2: #111827;
+    --border: rgba(99,179,237,0.12);
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #34d399;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: rgba(56,189,248,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* ─── Grid Background ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 { width:500px; height:500px; background:rgba(56,189,248,0.08); top:-100px; right:-100px; }
+  .orb-2 { width:400px; height:400px; background:rgba(129,140,248,0.07); bottom:0; left:-100px; }
+  .orb-3 { width:300px; height:300px; background:rgba(52,211,153,0.05); top:50%; left:50%; transform:translate(-50%,-50%); }
+
+  /* ─── Nav ─── */
+  nav {
+    position: fixed; top:0; left:0; right:0;
+    display: flex; align-items:center; justify-content:space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(8,12,20,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent3); -webkit-text-fill-color: var(--accent3); }
+  .nav-actions { display:flex; gap:1rem; }
+  .btn {
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: none;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0ea5e9);
+    color: #000;
+    font-weight: 600;
+    box-shadow: 0 0 20px rgba(56,189,248,0.3);
+  }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow: 0 0 30px rgba(56,189,248,0.5); }
+
+  /* ─── Hero ─── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; align-items:center; justify-content:center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex; align-items:center; gap:0.5rem;
+    background: rgba(56,189,248,0.1);
+    border: 1px solid rgba(56,189,248,0.25);
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem; color: var(--accent);
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease forwards;
+  }
+  .hero-badge::before { content:'●'; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+  h1 .highlight {
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    max-width: 580px; margin: 0 auto 2.5rem;
+    font-size: 1.15rem; color: var(--muted); line-height: 1.7;
+    font-weight: 300;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+  .hero-actions {
+    display: flex; gap:1rem; justify-content:center; flex-wrap:wrap;
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+  .btn-hero {
+    padding: 0.9rem 2.2rem;
+    font-size: 1rem; font-weight: 600;
+    border-radius: 10px;
+  }
+
+  /* ─── Stats ─── */
+  .stats {
+    display: flex; justify-content:center; gap:3rem; flex-wrap:wrap;
+    padding: 2rem 2rem 4rem;
+    animation: fadeUp 0.7s ease 0.4s both;
+    position: relative; z-index: 1;
+  }
+  .stat { text-align:center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-label { font-size: 0.85rem; color: var(--muted); margin-top:0.2rem; }
+
+  /* ─── Features ─── */
+  .features {
+    padding: 5rem 3rem;
+    max-width: 1200px; margin: 0 auto;
+    position: relative; z-index: 1;
+  }
+  .section-label {
+    text-align: center;
+    font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; text-align:center;
+    margin-bottom: 3rem; letter-spacing: -1px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute; inset:0;
+    background: linear-gradient(135deg, var(--glow), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover { border-color: rgba(56,189,248,0.3); transform:translateY(-4px); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(129,140,248,0.15));
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 12px;
+    display: flex; align-items:center; justify-content:center;
+    font-size: 1.5rem; margin-bottom: 1.2rem;
+  }
+  .feature-title { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:700; margin-bottom:0.5rem; }
+  .feature-desc { font-size:0.88rem; color:var(--muted); line-height:1.6; }
+
+  /* ─── Auth Modal ─── */
+  .modal-overlay {
+    position: fixed; inset:0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    display: flex; align-items:center; justify-content:center;
+    z-index: 1000;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.active { opacity:1; pointer-events:all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%; max-width: 420px;
+    margin: 1rem;
+    position: relative;
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,189,248,0.05);
+  }
+  .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+  .modal-header {
+    display: flex; justify-content:space-between; align-items:center;
+    margin-bottom: 2rem;
+  }
+  .modal-title { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; }
+  .modal-close {
+    background: none; border:none; color:var(--muted);
+    cursor:pointer; font-size:1.3rem; padding:0.2rem;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color:var(--text); }
+  .tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 2rem;
+  }
+  .tab {
+    flex:1; padding:0.6rem;
+    border:none; background:transparent;
+    color:var(--muted); font-family:'DM Sans',sans-serif;
+    font-size:0.9rem; font-weight:500;
+    cursor:pointer; border-radius:7px;
+    transition: all 0.2s;
+  }
+  .tab.active { background:var(--surface2); color:var(--text); }
+  .form-group { margin-bottom:1.2rem; }
+  .form-label { display:block; font-size:0.82rem; color:var(--muted); margin-bottom:0.5rem; letter-spacing:0.5px; }
+  .form-input {
+    width:100%; padding:0.75rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
+  .form-input::placeholder { color:var(--muted); opacity:0.6; }
+  .btn-full { width:100%; padding:0.85rem; font-size:0.95rem; margin-top:0.5rem; }
+  .auth-divider {
+    text-align:center; position:relative; margin:1.2rem 0;
+  }
+  .auth-divider::before {
+    content:''; position:absolute; top:50%; left:0; right:0; height:1px;
+    background:var(--border);
+  }
+  .auth-divider span {
+    position:relative; background:var(--surface);
+    padding:0 0.8rem; font-size:0.8rem; color:var(--muted);
+  }
+  .error-msg {
+    color: #f87171; font-size: 0.83rem;
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 8px; padding: 0.6rem 0.8rem;
+    margin-top: 0.8rem; display:none;
+  }
+  .error-msg.show { display:block; }
+  .success-msg {
+    color: var(--accent3); font-size: 0.83rem;
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 8px; padding: 0.6rem 0.8rem;
+    margin-top: 0.8rem; display:none;
+  }
+  .success-msg.show { display:block; }
+
+  /* ─── Footer ─── */
+  footer {
+    position:relative; z-index:1;
+    text-align:center; padding:2rem;
+    color:var(--muted); font-size:0.82rem;
+    border-top:1px solid var(--border);
+  }
+
+  /* ─── Process Steps ─── */
+  .process { padding:5rem 3rem; max-width:900px; margin:0 auto; position:relative; z-index:1; }
+  .steps { display:flex; flex-direction:column; gap:0; }
+  .step {
+    display:flex; gap:2rem; align-items:flex-start;
+    padding:2rem 0;
+    border-left: 1px solid var(--border);
+    padding-left: 2rem;
+    position:relative;
+  }
+  .step::before {
+    content: attr(data-num);
+    position:absolute; left:-20px;
+    width:40px; height:40px;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-size:0.9rem; font-weight:800;
+    color:#000;
+  }
+  .step-content h3 { font-family:'Syne',sans-serif; font-weight:700; margin-bottom:0.4rem; }
+  .step-content p { color:var(--muted); font-size:0.9rem; line-height:1.6; }
+
+  @media(max-width:600px) {
+    nav { padding:1rem 1.5rem; }
+    .hero { padding:5rem 1.5rem 3rem; }
+    .features { padding:3rem 1.5rem; }
+    .process { padding:3rem 1.5rem; }
+    .stats { gap:1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ambient Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="logo">Interview<span>AI</span></div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="openModal('login')">Sign In</button>
+    <button class="btn btn-primary" onclick="openModal('signup')">Get Started</button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div>
+    <div class="hero-badge">AI-Powered Interview Coach</div>
+    <h1>
+      Master Every<br>
+      <span class="highlight">Interview</span><br>
+      With AI
+    </h1>
+    <p class="hero-sub">
+      Upload your CV, answer AI-generated questions on video, and get instant feedback on your answers, body language, and skill gaps — with personalized course recommendations.
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-hero" onclick="openModal('signup')">
+        Start Free Interview →
+      </button>
+      <button class="btn btn-ghost btn-hero" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+        See How It Works
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Accuracy Rate</div></div>
+  <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Career Fields</div></div>
+  <div class="stat"><div class="stat-num">AI</div><div class="stat-label">Powered Analysis</div></div>
+  <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Available</div></div>
+</div>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="section-label">Core Features</div>
+  <h2 class="section-title">Everything You Need to <span style="color:var(--accent)">Succeed</span></h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📄</div>
+      <div class="feature-title">Smart CV Analysis</div>
+      <div class="feature-desc">AI reads your CV, identifies strengths, gaps, and generates tailored questions specific to your experience level and target field.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Custom Questions</div>
+      <div class="feature-desc">Get 7 personalized interview questions — technical, behavioral, and situational — crafted from your actual CV and chosen field.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎥</div>
+      <div class="feature-title">Live Video Interview</div>
+      <div class="feature-desc">Practice with your camera on. Real-time body language detection analyzes eye contact, posture, and facial expressions.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎙️</div>
+      <div class="feature-title">Speech-to-Text</div>
+      <div class="feature-desc">Speak your answers naturally. Browser-native speech recognition captures everything you say for AI evaluation.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Deep Feedback</div>
+      <div class="feature-desc">Receive detailed scores on clarity, relevance, confidence, and communication — with specific improvement suggestions.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title">Course Recommendations</div>
+      <div class="feature-desc">Get curated courses from top platforms to fill your exact skill gaps, with ratings, prices, and direct links.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section class="process" id="how">
+  <div class="section-label">How It Works</div>
+  <h2 class="section-title" style="text-align:center; margin-bottom:3rem;">Four Steps to <span style="color:var(--accent2)">Interview Ready</span></h2>
+  <div class="steps">
+    <div class="step" data-num="1">
+      <div class="step-content">
+        <h3>Upload Your CV</h3>
+        <p>Upload your CV in PDF, DOCX, or TXT format. Our AI instantly reads and analyzes your experience, skills, and qualifications.</p>
+      </div>
+    </div>
+    <div class="step" data-num="2">
+      <div class="step-content">
+        <h3>Select Your Field</h3>
+        <p>Choose your target job field. The AI generates 7 custom questions tailored to your CV and the specific role you're applying for.</p>
+      </div>
+    </div>
+    <div class="step" data-num="3">
+      <div class="step-content">
+        <h3>Answer on Video</h3>
+        <p>Answer each question by speaking naturally. Your body language is analyzed live — eye contact, posture, and expressions all evaluated in real-time.</p>
+      </div>
+    </div>
+    <div class="step" data-num="4">
+      <div class="step-content">
+        <h3>Get Your Report</h3>
+        <p>Receive a comprehensive report with scores, detailed feedback on each answer, body language assessment, and personalized course recommendations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>Built with Groq AI · © 2024 InterviewAI · All rights reserved</div>
+</footer>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Welcome Back</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="loginTab" onclick="switchTab('login')">Sign In</button>
+      <button class="tab" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">EMAIL ADDRESS</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PASSWORD</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••">
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn btn-primary btn-full" onclick="handleLogin()">Sign In →</button>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signupForm" style="display:none">
+      <div class="form-group">
+        <label class="form-label">FULL NAME</label>
+        <input type="text" class="form-input" id="signupName" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMAIL ADDRESS</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PASSWORD</label>
+        <input type="password" class="form-input" id="signupPassword" placeholder="Create a password">
+      </div>
+      <div class="error-msg" id="signupError"></div>
+      <div class="success-msg" id="signupSuccess"></div>
+      <button class="btn btn-primary btn-full" onclick="handleSignup()">Create Account →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal(tab) {
+    document.getElementById('authModal').classList.add('active');
+    switchTab(tab);
+  }
+  function closeModal() {
+    document.getElementById('authModal').classList.remove('active');
+  }
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('loginTab').classList.toggle('active', isLogin);
+    document.getElementById('signupTab').classList.toggle('active', !isLogin);
+    document.getElementById('modalTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
+  }
+  document.getElementById('authModal').addEventListener('click', function(e) {
+    if(e.target === this) closeModal();
+  });
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+  async function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.classList.remove('show');
+    if(!email || !password) { errEl.textContent='Please fill all fields'; errEl.classList.add('show'); return; }
+    try {
+      const res = await fetch('/api/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password})
+      });
+      const data = await res.json();
+      if(data.success) window.location.href = '/dashboard';
+      else { errEl.textContent = data.error || 'Invalid credentials'; errEl.classList.add('show'); }
+    } catch(e) { errEl.textContent='Connection error. Try again.'; errEl.classList.add('show'); }
+  }
+
+  async function handleSignup() {
+    const name = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const errEl = document.getElementById('signupError');
+    const okEl = document.getElementById('signupSuccess');
+    errEl.classList.remove('show'); okEl.classList.remove('show');
+    if(!name || !email || !password) { errEl.textContent='Please fill all fields'; errEl.classList.add('show'); return; }
+    if(password.length < 6) { errEl.textContent='Password must be at least 6 characters'; errEl.classList.add('show'); return; }
+    try {
+      const res = await fetch('/api/signup', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name, email, password})
+      });
+      const data = await res.json();
+      if(data.success) window.location.href = '/dashboard';
+      else { errEl.textContent = data.error || 'Signup failed'; errEl.classList.add('show'); }
+    } catch(e) { errEl.textContent='Connection error. Try again.'; errEl.classList.add('show'); }
+  }
+
+  // Handle Enter key
+  document.addEventListener('keypress', e => {
+    if(e.key === 'Enter') {
+      const isLogin = document.getElementById('loginForm').style.display !== 'none';
+      if(isLogin) handleLogin(); else handleSignup();
+    }
+  });
+</script>
+</body>
+</html>

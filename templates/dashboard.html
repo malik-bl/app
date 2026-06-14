@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — InterviewAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14; --surface: #0d1420; --surface2: #111827;
+    --border: rgba(99,179,237,0.12); --accent: #38bdf8;
+    --accent2: #818cf8; --accent3: #34d399; --text: #e2e8f0; --muted: #64748b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image: linear-gradient(rgba(99,179,237,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(99,179,237,0.03) 1px,transparent 1px);
+    background-size:60px 60px; pointer-events:none; z-index:0;
+  }
+
+  /* ─── Sidebar ─── */
+  .sidebar {
+    position:fixed; left:0; top:0; bottom:0; width:240px;
+    background:var(--surface); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; z-index:50;
+  }
+  .sidebar-logo {
+    padding:1.5rem; border-bottom:1px solid var(--border);
+    font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .sidebar-logo span { -webkit-text-fill-color:var(--accent3); }
+  .sidebar-nav { flex:1; padding:1.5rem 1rem; }
+  .nav-item {
+    display:flex; align-items:center; gap:0.75rem;
+    padding:0.7rem 0.8rem; border-radius:10px;
+    color:var(--muted); font-size:0.9rem; font-weight:500;
+    cursor:pointer; transition:all 0.2s; margin-bottom:0.3rem;
+    text-decoration:none;
+  }
+  .nav-item:hover { background:rgba(56,189,248,0.08); color:var(--text); }
+  .nav-item.active { background:rgba(56,189,248,0.12); color:var(--accent); }
+  .nav-item .icon { font-size:1.1rem; width:20px; text-align:center; }
+  .sidebar-footer { padding:1rem; border-top:1px solid var(--border); }
+  .user-info { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.8rem; }
+  .avatar {
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:800; font-size:0.85rem; color:#000;
+  }
+  .user-name { font-size:0.88rem; font-weight:500; }
+  .user-email { font-size:0.75rem; color:var(--muted); }
+  .btn-logout {
+    width:100%; padding:0.6rem; border-radius:8px;
+    background:transparent; border:1px solid var(--border);
+    color:var(--muted); font-family:'DM Sans',sans-serif;
+    font-size:0.83rem; cursor:pointer; transition:all 0.2s;
+  }
+  .btn-logout:hover { border-color:rgba(248,113,113,0.4); color:#f87171; }
+
+  /* ─── Main ─── */
+  .main { margin-left:240px; padding:2.5rem; position:relative; z-index:1; }
+  .page-header { margin-bottom:2.5rem; }
+  .page-title { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800; margin-bottom:0.4rem; }
+  .page-sub { color:var(--muted); font-size:0.9rem; }
+  .greeting { color:var(--accent); }
+
+  /* ─── Cards ─── */
+  .card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:16px; padding:2rem; margin-bottom:1.5rem;
+  }
+  .card-title {
+    font-family:'Syne',sans-serif; font-size:1rem; font-weight:700;
+    margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;
+  }
+  .card-title .num {
+    width:24px; height:24px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.75rem; color:#000; font-weight:800;
+  }
+
+  /* ─── Upload Zone ─── */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: rgba(56,189,248,0.02);
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(56,189,248,0.06);
+    transform: scale(1.01);
+  }
+  .upload-zone.has-file {
+    border-color: var(--accent3);
+    background: rgba(52,211,153,0.06);
+  }
+  .upload-icon { font-size:2.5rem; margin-bottom:1rem; }
+  .upload-title { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:700; margin-bottom:0.4rem; }
+  .upload-sub { font-size:0.85rem; color:var(--muted); }
+  .upload-types {
+    display:flex; gap:0.5rem; justify-content:center; margin-top:1rem; flex-wrap:wrap;
+  }
+  .type-tag {
+    padding:0.2rem 0.7rem; border-radius:50px;
+    background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2);
+    font-size:0.75rem; color:var(--accent);
+  }
+  #fileInput { display:none; }
+  .file-selected {
+    display:none; align-items:center; gap:0.75rem;
+    background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.2);
+    border-radius:10px; padding:0.8rem 1rem; margin-top:1.2rem;
+  }
+  .file-selected.show { display:flex; }
+  .file-icon { font-size:1.5rem; }
+  .file-name { font-size:0.88rem; font-weight:500; }
+  .file-size { font-size:0.78rem; color:var(--muted); }
+  .remove-file { margin-left:auto; background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; transition:color 0.2s; }
+  .remove-file:hover { color:#f87171; }
+
+  /* ─── Field Selection ─── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+  .field-btn {
+    padding: 0.8rem 0.6rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    text-align: center;
+    display: flex; flex-direction:column; align-items:center; gap:0.4rem;
+  }
+  .field-btn .f-icon { font-size:1.3rem; }
+  .field-btn:hover { border-color:rgba(56,189,248,0.3); color:var(--text); }
+  .field-btn.selected {
+    border-color: var(--accent); background: rgba(56,189,248,0.1);
+    color: var(--accent); box-shadow: 0 0 12px rgba(56,189,248,0.15);
+  }
+  .custom-field-wrap { display:flex; gap:0.75rem; margin-top:0.75rem; }
+  .form-input {
+    flex:1; padding:0.75rem 1rem;
+    background:var(--bg); border:1px solid var(--border);
+    border-radius:10px; color:var(--text);
+    font-family:'DM Sans',sans-serif; font-size:0.9rem;
+    outline:none; transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(56,189,248,0.1); }
+  .form-input::placeholder { color:var(--muted); }
+
+  /* ─── Analysis Result ─── */
+  .analysis-panel {
+    display:none;
+    background:var(--surface2); border-radius:14px;
+    padding:1.5rem; margin-top:1.5rem;
+    border:1px solid var(--border);
+  }
+  .analysis-panel.show { display:block; animation:fadeIn 0.4s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .analysis-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+  .analysis-name { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; }
+  .score-badge {
+    padding:0.3rem 0.9rem; border-radius:50px;
+    font-size:0.8rem; font-weight:600;
+  }
+  .score-high { background:rgba(52,211,153,0.15); color:var(--accent3); border:1px solid rgba(52,211,153,0.3); }
+  .score-med { background:rgba(251,191,36,0.15); color:#fbbf24; border:1px solid rgba(251,191,36,0.3); }
+  .score-low { background:rgba(248,113,113,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.3); }
+  .analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+  .analysis-section h4 { font-size:0.78rem; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:0.6rem; }
+  .tag-list { display:flex; flex-wrap:wrap; gap:0.4rem; }
+  .tag {
+    padding:0.25rem 0.65rem; border-radius:50px; font-size:0.78rem;
+  }
+  .tag-skill { background:rgba(56,189,248,0.1); color:var(--accent); border:1px solid rgba(56,189,248,0.2); }
+  .tag-strength { background:rgba(52,211,153,0.1); color:var(--accent3); border:1px solid rgba(52,211,153,0.2); }
+  .tag-gap { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.2); }
+  .analysis-summary { font-size:0.88rem; color:var(--muted); line-height:1.6; margin-bottom:1.2rem; }
+  .metrics-row { display:flex; gap:1rem; margin-top:1.2rem; }
+  .metric {
+    flex:1; text-align:center; background:var(--bg);
+    border-radius:10px; padding:0.8rem;
+  }
+  .metric-val { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; color:var(--accent); }
+  .metric-lbl { font-size:0.75rem; color:var(--muted); margin-top:0.2rem; }
+
+  /* ─── CTA Button ─── */
+  .btn-start {
+    width:100%; padding:1rem;
+    background:linear-gradient(135deg,var(--accent),#0ea5e9);
+    border:none; border-radius:12px;
+    font-family:'Syne',sans-serif; font-size:1rem; font-weight:700;
+    color:#000; cursor:pointer;
+    transition:all 0.3s;
+    box-shadow:0 0 25px rgba(56,189,248,0.3);
+    margin-top:1.5rem;
+    display:none;
+  }
+  .btn-start.show { display:block; animation:fadeIn 0.4s ease; }
+  .btn-start:hover { transform:translateY(-2px); box-shadow:0 0 40px rgba(56,189,248,0.5); }
+  .btn-start:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+  /* ─── Loading ─── */
+  .loading-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(8,12,20,0.85);
+    backdrop-filter:blur(8px);
+    z-index:200;
+    flex-direction:column; align-items:center; justify-content:center;
+  }
+  .loading-overlay.show { display:flex; }
+  .spinner {
+    width:60px; height:60px;
+    border:3px solid var(--border);
+    border-top-color:var(--accent);
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+    margin-bottom:1.5rem;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-text { font-family:'Syne',sans-serif; font-size:1.1rem; color:var(--accent); }
+  .loading-sub { color:var(--muted); font-size:0.85rem; margin-top:0.5rem; }
+
+  @media(max-width:768px) {
+    .sidebar { display:none; }
+    .main { margin-left:0; padding:1.5rem; }
+    .analysis-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">Interview<span>AI</span></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="/interview"><span class="icon">🎥</span> Interview</a>
+    <a class="nav-item" href="/results"><span class="icon">📊</span> Results</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="avatar" id="avatarEl">?</div>
+      <div>
+        <div class="user-name" id="userNameEl">Loading...</div>
+        <div class="user-email">Candidate</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+  <div class="page-header">
+    <div class="page-title">Welcome, <span class="greeting" id="greetingName">there</span> 👋</div>
+    <div class="page-sub">Let's prepare you for your next interview. Upload your CV and choose a field to begin.</div>
+  </div>
+
+  <!-- Step 1: Upload CV -->
+  <div class="card">
+    <div class="card-title"><div class="num">1</div> Upload Your CV</div>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt">
+      <div class="upload-icon">📄</div>
+      <div class="upload-title">Drop your CV here or click to browse</div>
+      <div class="upload-sub">AI will analyze your experience, skills, and generate personalized questions</div>
+      <div class="upload-types">
+        <span class="type-tag">PDF</span>
+        <span class="type-tag">DOCX</span>
+        <span class="type-tag">DOC</span>
+        <span class="type-tag">TXT</span>
+      </div>
+    </div>
+    <div class="file-selected" id="fileSelected">
+      <div class="file-icon">📄</div>
+      <div>
+        <div class="file-name" id="fileName">—</div>
+        <div class="file-size" id="fileSize">—</div>
+      </div>
+      <button class="remove-file" onclick="removeFile(event)">✕</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Choose Field -->
+  <div class="card">
+    <div class="card-title"><div class="num">2</div> Select Your Target Field</div>
+    <div class="fields-grid" id="fieldsGrid">
+      <button class="field-btn" onclick="selectField(this,'Software Engineering')"><span class="f-icon">💻</span>Software Engineering</button>
+      <button class="field-btn" onclick="selectField(this,'Data Science')"><span class="f-icon">📊</span>Data Science</button>
+      <button class="field-btn" onclick="selectField(this,'Product Management')"><span class="f-icon">🚀</span>Product Management</button>
+      <button class="field-btn" onclick="selectField(this,'UI/UX Design')"><span class="f-icon">🎨</span>UI/UX Design</button>
+      <button class="field-btn" onclick="selectField(this,'Marketing')"><span class="f-icon">📣</span>Marketing</button>
+      <button class="field-btn" onclick="selectField(this,'Finance')"><span class="f-icon">💰</span>Finance</button>
+      <button class="field-btn" onclick="selectField(this,'Human Resources')"><span class="f-icon">👥</span>Human Resources</button>
+      <button class="field-btn" onclick="selectField(this,'Sales')"><span class="f-icon">🤝</span>Sales</button>
+      <button class="field-btn" onclick="selectField(this,'Cybersecurity')"><span class="f-icon">🔒</span>Cybersecurity</button>
+      <button class="field-btn" onclick="selectField(this,'Machine Learning')"><span class="f-icon">🤖</span>Machine Learning</button>
+      <button class="field-btn" onclick="selectField(this,'DevOps')"><span class="f-icon">⚙️</span>DevOps</button>
+      <button class="field-btn" onclick="selectField(this,'Business Analysis')"><span class="f-icon">📋</span>Business Analysis</button>
+    </div>
+    <div class="custom-field-wrap">
+      <input type="text" class="form-input" id="customField" placeholder="Or type a custom field (e.g. Blockchain Developer)">
+      <button class="field-btn" style="min-width:80px" onclick="useCustomField()">Use</button>
+    </div>
+  </div>
+
+  <!-- CV Analysis Result -->
+  <div class="analysis-panel" id="analysisPanel">
+    <div class="analysis-header">
+      <div>
+        <div class="analysis-name" id="cvName">—</div>
+        <div style="color:var(--muted);font-size:0.83rem;margin-top:0.2rem" id="cvLevel">—</div>
+      </div>
+      <div class="score-badge" id="cvScore">—</div>
+    </div>
+    <div class="analysis-summary" id="cvSummary">—</div>
+    <div class="analysis-grid">
+      <div class="analysis-section">
+        <h4>Skills Detected</h4>
+        <div class="tag-list" id="cvSkills"></div>
+      </div>
+      <div class="analysis-section">
+        <h4>Strengths</h4>
+        <div class="tag-list" id="cvStrengths"></div>
+      </div>
+      <div class="analysis-section" style="margin-top:1rem">
+        <h4>Skill Gaps</h4>
+        <div class="tag-list" id="cvGaps"></div>
+      </div>
+      <div class="analysis-section" style="margin-top:1rem">
+        <h4>Education</h4>
+        <div id="cvEducation" style="font-size:0.88rem;color:var(--muted)">—</div>
+      </div>
+    </div>
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-val" id="mScore">—</div><div class="metric-lbl">CV Score</div></div>
+      <div class="metric"><div class="metric-val" id="mField">—</div><div class="metric-lbl">Field Match</div></div>
+      <div class="metric"><div class="metric-val" id="mYears">—</div><div class="metric-lbl">Years Exp.</div></div>
+    </div>
+  </div>
+
+  <!-- Start Button -->
+  <button class="btn-start" id="startBtn" onclick="startInterview()">
+    🚀 Generate Questions & Start Interview
+  </button>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Analyzing your CV...</div>
+  <div class="loading-sub" id="loadingSub">This may take a few seconds</div>
+</div>
+
+<script>
+  let selectedFile = null;
+  let selectedField = '';
+  let cvAnalyzed = false;
+
+  // Load user info
+  fetch('/api/auth/status').then(r=>r.json()).then(d=>{
+    if(!d.authenticated) window.location.href='/';
+    document.getElementById('greetingName').textContent = d.name?.split(' ')[0] || 'there';
+    document.getElementById('userNameEl').textContent = d.name || 'User';
+    document.getElementById('avatarEl').textContent = (d.name||'U')[0].toUpperCase();
+  });
+
+  // Drag & drop
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f) handleFile(f); });
+
+  document.getElementById('fileInput').addEventListener('change', e => {
+    if(e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file) {
+    const allowed = ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain'];
+    const ext = file.name.split('.').pop().toLowerCase();
+    if(!['pdf','doc','docx','txt'].includes(ext)) { alert('Please upload PDF, DOC, DOCX, or TXT'); return; }
+    selectedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = (file.size/1024/1024).toFixed(2)+' MB';
+    document.getElementById('fileSelected').classList.add('show');
+    zone.classList.add('has-file');
+    cvAnalyzed = false;
+    document.getElementById('analysisPanel').classList.remove('show');
+    checkReady();
+    if(selectedField) analyzeCV();
+  }
+
+  function removeFile(e) {
+    e.stopPropagation();
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileSelected').classList.remove('show');
+    zone.classList.remove('has-file');
+    cvAnalyzed = false;
+    document.getElementById('analysisPanel').classList.remove('show');
+    checkReady();
+  }
+
+  function selectField(btn, field) {
+    document.querySelectorAll('.field-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedField = field;
+    document.getElementById('customField').value = '';
+    checkReady();
+    if(selectedFile && !cvAnalyzed) analyzeCV();
+  }
+
+  function useCustomField() {
+    const v = document.getElementById('customField').value.trim();
+    if(!v) return;
+    document.querySelectorAll('.field-btn').forEach(b => b.classList.remove('selected'));
+    selectedField = v;
+    checkReady();
+    if(selectedFile && !cvAnalyzed) analyzeCV();
+  }
+
+  function checkReady() {
+    const ready = selectedFile && selectedField && cvAnalyzed;
+    const btn = document.getElementById('startBtn');
+    if(ready) btn.classList.add('show'); else btn.classList.remove('show');
+  }
+
+  async function analyzeCV() {
+    if(!selectedFile || !selectedField) return;
+    showLoading('Analyzing your CV...', 'AI is reading your experience and skills');
+    const formData = new FormData();
+    formData.append('cv', selectedFile);
+    formData.append('field', selectedField);
+    try {
+      const res = await fetch('/api/upload-cv', { method:'POST', body:formData });
+      const data = await res.json();
+      hideLoading();
+      if(data.success) {
+        showAnalysis(data.analysis);
+        cvAnalyzed = true;
+        checkReady();
+      } else alert(data.error || 'Analysis failed');
+    } catch(e) { hideLoading(); alert('Upload failed. Please try again.'); }
+  }
+
+  function showAnalysis(a) {
+    document.getElementById('cvName').textContent = a.name || 'Your CV';
+    document.getElementById('cvLevel').textContent = `${a.experience_level || 'Professional'} · ${selectedField}`;
+    const s = a.overall_score || 0;
+    const sb = document.getElementById('cvScore');
+    sb.textContent = `Score: ${s}/100`;
+    sb.className = 'score-badge ' + (s>=75?'score-high':s>=55?'score-med':'score-low');
+    document.getElementById('cvSummary').textContent = a.summary || '';
+    document.getElementById('cvSkills').innerHTML = (a.skills||[]).map(s=>`<span class="tag tag-skill">${s}</span>`).join('');
+    document.getElementById('cvStrengths').innerHTML = (a.strengths||[]).map(s=>`<span class="tag tag-strength">${s}</span>`).join('');
+    document.getElementById('cvGaps').innerHTML = (a.gaps||[]).map(g=>`<span class="tag tag-gap">${g}</span>`).join('');
+    document.getElementById('cvEducation').textContent = a.education || '—';
+    document.getElementById('mScore').textContent = s+'%';
+    document.getElementById('mField').textContent = (a.field_match||0)+'%';
+    document.getElementById('mYears').textContent = a.experience_years||0;
+    document.getElementById('analysisPanel').classList.add('show');
+  }
+
+  async function startInterview() {
+    const btn = document.getElementById('startBtn');
+    btn.disabled = true; btn.textContent = 'Generating questions...';
+    showLoading('Generating Your Questions...', 'Crafting personalized interview questions from your CV');
+    try {
+      const res = await fetch('/api/generate-questions', { method:'POST', headers:{'Content-Type':'application/json'} });
+      const data = await res.json();
+      hideLoading();
+      if(data.questions) window.location.href = '/interview';
+      else { btn.disabled=false; btn.textContent='🚀 Generate Questions & Start Interview'; alert('Failed to generate questions.'); }
+    } catch(e) { hideLoading(); btn.disabled=false; btn.textContent='🚀 Generate Questions & Start Interview'; alert('Error. Try again.'); }
+  }
+
+  function showLoading(text, sub) {
+    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingSub').textContent = sub;
+    document.getElementById('loadingOverlay').classList.add('show');
+  }
+  function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+  async function logout() {
+    await fetch('/api/logout', {method:'POST'});
+    window.location.href = '/';
+  }
+</script>
+</body>
+</html>

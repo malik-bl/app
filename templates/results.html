@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Results — InterviewAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080c14;--surface:#0d1420;--surface2:#111827;--border:rgba(99,179,237,0.12);--accent:#38bdf8;--accent2:#818cf8;--accent3:#34d399;--text:#e2e8f0;--muted:#64748b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+  /* ─── Sidebar ─── */
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:50;}
+  .sidebar-logo{padding:1.5rem;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .sidebar-logo span{-webkit-text-fill-color:var(--accent3);}
+  .sidebar-nav{flex:1;padding:1.5rem 1rem;}
+  .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.8rem;border-radius:10px;color:var(--muted);font-size:0.9rem;font-weight:500;cursor:pointer;transition:all 0.2s;margin-bottom:0.3rem;text-decoration:none;}
+  .nav-item:hover{background:rgba(56,189,248,0.08);color:var(--text);}
+  .nav-item.active{background:rgba(56,189,248,0.12);color:var(--accent);}
+  .nav-item .icon{font-size:1.1rem;width:20px;text-align:center;}
+
+  /* ─── Main ─── */
+  .main{margin-left:240px;padding:2.5rem;position:relative;z-index:1;max-width:1100px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ─── Report Header ─── */
+  .report-header{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;margin-bottom:2rem;position:relative;overflow:hidden;animation:fadeUp 0.5s ease;}
+  .report-header::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));}
+  .rh-top{display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+  .rh-left h1{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:0.4rem;}
+  .rh-left p{color:var(--muted);font-size:0.9rem;}
+  .rh-grade{text-align:center;}
+  .grade-circle{width:100px;height:100px;border-radius:50%;background:conic-gradient(var(--accent) 0deg, transparent 0deg);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;margin:0 auto;}
+  .grade-ring{width:100px;height:100px;border-radius:50%;background:var(--bg);border:6px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .grade-letter{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:1;}
+  .grade-score{font-size:0.8rem;color:var(--muted);margin-top:0.2rem;}
+  .hire-badge{margin-top:0.75rem;padding:0.35rem 1rem;border-radius:50px;font-size:0.8rem;font-weight:600;text-align:center;display:inline-block;}
+  .hire-yes{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:var(--accent3);}
+  .hire-maybe{background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;}
+  .hire-no{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:#f87171;}
+  .summary-text{margin-top:1.5rem;padding:1.2rem;background:rgba(56,189,248,0.04);border:1px solid var(--border);border-radius:12px;font-size:0.9rem;line-height:1.7;color:var(--muted);}
+
+  /* ─── Score Cards ─── */
+  .score-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;animation:fadeUp 0.5s ease 0.1s both;}
+  .score-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;text-align:center;}
+  .sc-icon{font-size:1.8rem;margin-bottom:0.75rem;}
+  .sc-score{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:0.3rem;}
+  .sc-label{font-size:0.82rem;color:var(--muted);}
+  .sc-bar{height:4px;border-radius:50px;background:rgba(56,189,248,0.1);margin-top:0.75rem;overflow:hidden;}
+  .sc-fill{height:100%;border-radius:50px;}
+
+  /* ─── Content Grid ─── */
+  .content-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;animation:fadeUp 0.5s ease 0.2s both;}
+
+  /* ─── Cards ─── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.8rem;}
+  .card-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.5rem;}
+  .list-item{display:flex;align-items:flex-start;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--border);}
+  .list-item:last-child{border-bottom:none;}
+  .li-icon{font-size:1rem;flex-shrink:0;margin-top:0.1rem;}
+  .li-text{font-size:0.87rem;line-height:1.5;}
+  .li-text strong{display:block;font-weight:500;margin-bottom:0.1rem;}
+  .li-text span{color:var(--muted);}
+  .priority-tag{padding:0.15rem 0.5rem;border-radius:50px;font-size:0.7rem;font-weight:600;margin-left:0.5rem;}
+  .pri-high{background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.2);}
+  .pri-med{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
+  .pri-low{background:rgba(52,211,153,0.1);color:var(--accent3);border:1px solid rgba(52,211,153,0.2);}
+
+  /* ─── Q&A Review ─── */
+  .qa-section{margin-bottom:2rem;animation:fadeUp 0.5s ease 0.3s both;}
+  .qa-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1rem;}
+  .qa-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;}
+  .qa-q{font-size:0.95rem;font-weight:500;flex:1;}
+  .qa-badges{display:flex;gap:0.5rem;flex-shrink:0;}
+  .qa-score{padding:0.25rem 0.7rem;border-radius:50px;font-size:0.78rem;font-weight:700;border:1px solid;}
+  .transcript-preview{background:var(--bg);border-radius:10px;padding:0.8rem 1rem;font-size:0.83rem;color:var(--muted);line-height:1.5;margin-bottom:0.8rem;font-style:italic;}
+  .qa-feedback{font-size:0.83rem;color:var(--muted);line-height:1.5;}
+  .qa-improvements{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.6rem;}
+  .qa-imp{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:50px;padding:0.2rem 0.6rem;font-size:0.73rem;color:#f87171;}
+  .qa-strength{background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:50px;padding:0.2rem 0.6rem;font-size:0.73rem;color:var(--accent3);}
+
+  /* ─── Courses ─── */
+  .courses-section{margin-bottom:2rem;animation:fadeUp 0.5s ease 0.4s both;}
+  .courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;}
+  .course-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;transition:all 0.3s;position:relative;overflow:hidden;}
+  .course-card:hover{border-color:rgba(56,189,248,0.3);transform:translateY(-3px);}
+  .course-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity 0.3s;}
+  .course-card:hover::after{opacity:1;}
+  .cc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:0.75rem;}
+  .cc-platform{padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;font-weight:600;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);color:var(--accent);white-space:nowrap;}
+  .cc-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;margin-bottom:0.4rem;}
+  .cc-desc{font-size:0.82rem;color:var(--muted);line-height:1.5;margin-bottom:0.75rem;}
+  .cc-meta{display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;font-size:0.78rem;color:var(--muted);}
+  .cc-meta span{display:flex;align-items:center;gap:0.3rem;}
+  .cc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);}
+  .cc-price{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--accent3);}
+  .cc-link{padding:0.4rem 0.9rem;border-radius:8px;background:linear-gradient(135deg,var(--accent),#0ea5e9);border:none;color:#000;font-size:0.8rem;font-weight:600;cursor:pointer;text-decoration:none;transition:opacity 0.2s;}
+  .cc-link:hover{opacity:0.85;}
+  .cc-gap{font-size:0.73rem;color:var(--accent2);}
+
+  /* ─── CTA ─── */
+  .cta-section{background:linear-gradient(135deg,rgba(56,189,248,0.08),rgba(129,140,248,0.08));border:1px solid rgba(56,189,248,0.15);border-radius:20px;padding:2.5rem;text-align:center;margin-bottom:2rem;animation:fadeUp 0.5s ease 0.5s both;}
+  .cta-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:0.75rem;}
+  .cta-sub{color:var(--muted);margin-bottom:1.5rem;line-height:1.6;}
+  .cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+  .btn{padding:0.8rem 1.8rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:none;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#000;box-shadow:0 0 20px rgba(56,189,248,0.3);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(56,189,248,0.5);}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* Loading */
+  .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:1.5rem;}
+  .spinner{width:50px;height:50px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media(max-width:900px){
+    .sidebar{display:none;}
+    .main{margin-left:0;padding:1.5rem;}
+    .score-row{grid-template-columns:1fr;}
+    .content-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">Interview<span>AI</span></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="/interview"><span class="icon">🎥</span> Interview</a>
+    <a class="nav-item active" href="/results"><span class="icon">📊</span> Results</a>
+  </nav>
+</div>
+
+<!-- Main -->
+<div class="main" id="mainContent">
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <div style="font-family:'Syne',sans-serif;font-size:1rem;color:var(--accent)">Loading your results...</div>
+  </div>
+</div>
+
+<script>
+  const colorsForScore = s => s>=75?'var(--accent3)':s>=55?'#fbbf24':'#f87171';
+  const fillForScore = s => s>=75?'linear-gradient(90deg,var(--accent3),#059669)':s>=55?'linear-gradient(90deg,#fbbf24,#d97706)':'linear-gradient(90deg,#f87171,#dc2626)';
+  const hireBadgeClass = h => h?.toLowerCase().includes('strong')?'hire-yes':h?.toLowerCase().includes('yes')?'hire-yes':h?.toLowerCase().includes('maybe')?'hire-maybe':'hire-no';
+
+  async function loadResults() {
+    // First try to generate if not done
+    try {
+      let res = await fetch('/api/get-results');
+      let data = await res.json();
+      if(!data.feedback) {
+        res = await fetch('/api/generate-feedback', {method:'POST',headers:{'Content-Type':'application/json'}});
+        data = await res.json();
+      }
+      renderResults(data);
+    } catch(e) {
+      document.getElementById('mainContent').innerHTML = `
+        <div style="text-align:center;padding:4rem;color:var(--muted)">
+          <div style="font-size:3rem;margin-bottom:1rem">⚠️</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.2rem;color:var(--text);margin-bottom:0.5rem">No Results Found</div>
+          <p>Please complete an interview first.</p>
+          <a href="/dashboard" style="display:inline-block;margin-top:1.5rem;padding:0.8rem 1.8rem;background:linear-gradient(135deg,var(--accent),#0ea5e9);border-radius:10px;color:#000;font-weight:600;text-decoration:none;">Go to Dashboard →</a>
+        </div>`;
+    }
+  }
+
+  function renderResults(data) {
+    const fb = data.feedback || {};
+    const courses = data.courses || [];
+    const answers = data.answers || [];
+    const field = data.field || 'General';
+    const score = fb.overall_score || 0;
+    const grade = fb.grade || 'C';
+    const hire = fb.hire_recommendation || 'Maybe';
+
+    const gradeColor = grade==='A'?'var(--accent3)':grade==='B'?'var(--accent)':grade==='C'?'#fbbf24':'#f87171';
+
+    document.getElementById('mainContent').innerHTML = `
+      <!-- Report Header -->
+      <div class="report-header">
+        <div class="rh-top">
+          <div class="rh-left">
+            <h1>Interview Report</h1>
+            <p>Field: <strong>${field}</strong> · Completed ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</p>
+          </div>
+          <div class="rh-grade">
+            <div class="grade-ring">
+              <div class="grade-letter" style="color:${gradeColor}">${grade}</div>
+              <div class="grade-score">${score}/100</div>
+            </div>
+            <div class="hire-badge ${hireBadgeClass(hire)}">${hire}</div>
+          </div>
+        </div>
+        <div class="summary-text">${fb.summary||'Interview completed successfully.'}</div>
+      </div>
+
+      <!-- Score Cards -->
+      <div class="score-row">
+        <div class="score-card">
+          <div class="sc-icon">💬</div>
+          <div class="sc-score" style="color:${colorsForScore(fb.communication_score||0)}">${fb.communication_score||0}<span style="font-size:1rem;color:var(--muted)">/100</span></div>
+          <div class="sc-label">Communication</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:${fb.communication_score||0}%;background:${fillForScore(fb.communication_score||0)}"></div></div>
+        </div>
+        <div class="score-card">
+          <div class="sc-icon">⚙️</div>
+          <div class="sc-score" style="color:${colorsForScore(fb.technical_score||0)}">${fb.technical_score||0}<span style="font-size:1rem;color:var(--muted)">/100</span></div>
+          <div class="sc-label">Technical</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:${fb.technical_score||0}%;background:${fillForScore(fb.technical_score||0)}"></div></div>
+        </div>
+        <div class="score-card">
+          <div class="sc-icon">🧠</div>
+          <div class="sc-score" style="color:${colorsForScore(fb.behavioral_score||0)}">${fb.behavioral_score||0}<span style="font-size:1rem;color:var(--muted)">/100</span></div>
+          <div class="sc-label">Behavioral</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:${fb.behavioral_score||0}%;background:${fillForScore(fb.behavioral_score||0)}"></div></div>
+        </div>
+      </div>
+
+      <!-- Strengths & Gaps -->
+      <div class="content-grid">
+        <div class="card">
+          <div class="card-title">💪 Top Strengths</div>
+          ${(fb.top_strengths||[]).map(s=>`
+            <div class="list-item"><div class="li-icon">✅</div><div class="li-text">${s}</div></div>
+          `).join('') || '<div class="li-text" style="color:var(--muted)">No strengths identified.</div>'}
+        </div>
+        <div class="card">
+          <div class="card-title">🎯 Areas to Improve</div>
+          ${(fb.areas_to_improve||[]).map(a=>`
+            <div class="list-item">
+              <div class="li-icon">${a.priority==='High'?'🔴':a.priority==='Medium'?'🟡':'🟢'}</div>
+              <div class="li-text">
+                <strong>${a.area}<span class="priority-tag pri-${(a.priority||'').toLowerCase()}">${a.priority||''}</span></strong>
+                <span>${a.description||''}</span>
+              </div>
+            </div>
+          `).join('') || '<div class="li-text" style="color:var(--muted)">Great job! No critical gaps identified.</div>'}
+        </div>
+      </div>
+
+      <!-- Q&A Review -->
+      <div class="qa-section">
+        <h2 class="card-title" style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:1.2rem;">📝 Answer-by-Answer Review</h2>
+        ${answers.map((a,i)=>{
+          const sc = a.answer_analysis?.score||0;
+          const cat = (a.question?.category||'').toLowerCase();
+          return `
+          <div class="qa-card">
+            <div class="qa-header">
+              <div class="qa-q">Q${i+1}. ${a.question?.question||''}</div>
+              <div class="qa-badges">
+                <span class="q-cat ${cat}" style="padding:0.2rem 0.6rem;border-radius:50px;font-size:0.72rem;border:1px solid;">${a.question?.category||''}</span>
+                <span class="qa-score" style="color:${colorsForScore(sc)};border-color:${colorsForScore(sc)};">${sc}/100</span>
+              </div>
+            </div>
+            ${a.transcript?`<div class="transcript-preview">"${a.transcript.substring(0,200)}${a.transcript.length>200?'...':''}"</div>`:'<div class="transcript-preview">No answer recorded.</div>'}
+            <div class="qa-feedback">${a.answer_analysis?.feedback||''}</div>
+            <div class="qa-improvements">
+              ${(a.answer_analysis?.strengths||[]).map(s=>`<span class="qa-strength">✓ ${s}</span>`).join('')}
+              ${(a.answer_analysis?.improvements||[]).map(imp=>`<span class="qa-imp">↑ ${imp}</span>`).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- Course Recommendations -->
+      <div class="courses-section">
+        <h2 class="card-title" style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:0.4rem;">🎬 Free Video Courses — Personalised for You</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">3 categories based on your CV gaps, target field, and interview performance</p>
+
+        ${['CV Gap', 'Field Skills', 'Interview Skills'].map(cat => {
+          const catCourses = courses.filter(c => c.category === cat);
+          if (!catCourses.length) return '';
+          const catMeta = {
+            'CV Gap':           { icon:'📄', color:'var(--accent)',  label:'CV Skill Gaps',            sub:'Fills what\'s missing from your resume' },
+            'Field Skills':     { icon:'🎯', color:'var(--accent2)', label:`${field} Field Skills`,    sub:'Core skills for your target role' },
+            'Interview Skills': { icon:'🗣️', color:'var(--accent3)', label:'Interview Performance',    sub:'Communication, confidence & STAR method' }
+          }[cat];
+          return `
+          <div style="margin-bottom:2rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;padding:0.75rem 1rem;background:rgba(56,189,248,0.04);border-radius:10px;border-left:3px solid ${catMeta.color};">
+              <span style="font-size:1.3rem;">${catMeta.icon}</span>
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:800;color:${catMeta.color};">${catMeta.label}</div>
+                <div style="font-size:0.75rem;color:var(--muted);">${catMeta.sub}</div>
+              </div>
+            </div>
+            <div class="courses-grid">
+              ${catCourses.map(c => {
+                const isYT  = (c.url||'').includes('youtube.com') || (c.platform||'').toLowerCase().includes('youtube');
+                const isKA  = (c.platform||'').toLowerCase().includes('khan');
+                const isCS50= (c.platform||'').toLowerCase().includes('harvard') || (c.platform||'').toLowerCase().includes('cs50');
+                const badge = isYT ? '▶ YouTube' : isKA ? '📚 Khan Academy' : isCS50 ? '🎓 Harvard Free' : '🎬 Free Video';
+                const btnStyle = isYT ? 'background:linear-gradient(135deg,#ef4444,#dc2626);' : '';
+                const platStyle = isYT ? 'background:rgba(255,0,0,0.12);border-color:rgba(255,0,0,0.3);color:#f87171;' : '';
+                return `
+                <div class="course-card">
+                  <div class="cc-header">
+                    <div style="flex:1">
+                      <div class="cc-title">${c.title}</div>
+                      <div class="cc-gap">🎯 ${c.addresses_gap||'General skills'}</div>
+                    </div>
+                    <div class="cc-platform" style="${platStyle}">${badge}</div>
+                  </div>
+                  <div class="cc-desc">${c.description||''}</div>
+                  <div class="cc-meta">
+                    <span>⭐ ${c.rating||4.8}</span>
+                    <span>⏱️ ${c.duration||'?'}</span>
+                    <span>📊 ${c.level||'All levels'}</span>
+                  </div>
+                  <div class="cc-footer">
+                    <div class="cc-price">🆓 100% Free</div>
+                    <a href="${c.url||'#'}" target="_blank" rel="noopener" class="cc-link" style="${btnStyle}">
+                      ${isYT ? '▶ Watch Now' : '→ Start Learning'}
+                    </a>
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-section">
+        <div class="cta-title">Ready to Try Again?</div>
+        <div class="cta-sub">Practice makes perfect. Upload a new CV or try a different field to keep improving your interview skills.</div>
+        <div class="cta-btns">
+          <button class="btn btn-primary" onclick="window.location.href='/dashboard'">Start New Interview →</button>
+          <button class="btn btn-ghost" onclick="window.print()">Download Report</button>
+        </div>
+      </div>
+    `;
+
+    // Animate score bars
+    document.querySelectorAll('.sc-fill').forEach(el => {
+      const w = el.style.width;
+      el.style.width = '0%';
+      setTimeout(() => el.style.width = w, 200);
+    });
+  }
+
+  loadResults();
+</script>
+</body>
+</html>
